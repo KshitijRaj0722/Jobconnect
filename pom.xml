@@ -74,6 +74,13 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Twilio SDK for SMS Notifications -->
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>9.14.0</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
