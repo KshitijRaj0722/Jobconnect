@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - JobConnect</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="glass-card">
+            <h2 class="brand-title">JobConnect</h2>
+            <p class="brand-subtitle">Create your account to get started</p>
+            
+            <form th:action="@{/register}" th:object="${user}" method="post">
+                <!-- Global Error Message -->
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-error">
+                    <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="fullName" class="form-label">Full Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="fullName" th:field="*{fullName}" class="form-input" placeholder="John Doe" required>
+                    </div>
+                    <span class="input-error-msg" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" th:field="*{email}" class="form-input" placeholder="name@example.com" required>
+                    </div>
+                    <span class="input-error-msg" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" th:field="*{password}" class="form-input" placeholder="••••••••" required>
+                    </div>
+                    <span class="input-error-msg" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="phoneNumber" class="form-label">Phone Number (For SMS Alerts)</label>
+                    <div class="input-wrapper">
+                        <input type="tel" id="phoneNumber" th:field="*{phoneNumber}" class="form-input" placeholder="+1234567890">
+                    </div>
+                    <span class="input-error-msg" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="role" class="form-label">I want to register as a</label>
+                    <div class="input-wrapper">
+                        <select id="role" th:field="*{role}" class="form-input" required>
+                            <option value="" disabled selected>Select your role</option>
+                            <option th:each="r : ${roles}" th:value="${r}" th:text="${r == T(com.jobconnect.model.Role).ROLE_JOB_SEEKER ? 'Job Seeker' : 'Employer'}"></option>
+                        </select>
+                    </div>
+                    <span class="input-error-msg" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+
+            <div class="auth-footer">
+                Already have an account? 
+                <a th:href="@{/login}" class="auth-link">Sign In</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Jobs - JobConnect</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .search-bar {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        @media (max-width: 768px) {
+            .search-bar {
+                grid-template-columns: 1fr;
+            }
+        }
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        .job-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 16px;
+            transition: var(--transition-fast);
+        }
+        .job-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
+        }
+        .job-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+        .job-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .job-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        @media (max-width: 600px) {
+            .job-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+            .job-card .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a th:href="@{/dashboard}" class="navbar-brand">JobConnect</a>
+        <div class="nav-links">
+            <a th:href="@{/dashboard}" class="btn-logout">Dashboard</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="dashboard-container">
+        <div style="margin-bottom: 2.5rem; text-align: center;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff;">Explore Career Opportunities</h1>
+            <p style="color: var(--text-muted);">Find job listings matching your skills and location preference</p>
+        </div>
+
+        <!-- Search Form -->
+        <form th:action="@{/jobs/search}" method="get" class="search-bar glass-card" style="max-width: 100%; padding: 2rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="keyword" class="form-label">Keyword / Job Title</label>
+                <input type="text" id="keyword" name="keyword" th:value="${keyword}" class="form-input" placeholder="e.g. Java, Engineer, Developer">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="location" class="form-label">Location</label>
+                <input type="text" id="location" name="location" th:value="${location}" class="form-input" placeholder="e.g. Remote, San Francisco">
+            </div>
+
+            <div style="display: flex; align-items: flex-end;">
+                <button type="submit" class="btn btn-primary" style="height: 48px; width: 100%;">Search Jobs</button>
+            </div>
+        </form>
+
+        <!-- Search Results Listings -->
+        <div class="jobs-grid">
+            <div th:if="${#lists.isEmpty(jobs)}" class="glass-card" style="max-width: 100%; text-align: center; padding: 4rem 2rem;">
+                <h3 style="color: var(--text-muted); margin-bottom: 0.5rem;">No Job Listings Found</h3>
+                <p style="color: rgba(255,255,255,0.4);">Try adjusting your search keywords or location filters.</p>
+            </div>
+
+            <!-- Job Cards -->
+            <div th:each="job : ${jobs}" class="job-card">
+                <div class="job-info">
+                    <h3 th:text="${job.title}">Senior Developer</h3>
+                    <div class="job-meta-row">
+                        <div class="job-meta-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span th:text="${job.location}">Remote</span>
+                        </div>
+                        <div class="job-meta-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span th:text="'$' + ${#numbers.formatDecimal(job.salary, 0, 'COMMAS', 0, 'POINT')} + ' / yr'">$100,000</span>
+                        </div>
+                        <div class="job-meta-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span th:text="'Deadline: ' + ${job.deadline}">2026-06-30</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-size: 0.9rem;">View Details & Apply</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

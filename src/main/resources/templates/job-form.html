@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${isEdit} ? 'Edit Job - JobConnect' : 'Post a Job - JobConnect'">Post a Job</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a th:href="@{/dashboard}" class="navbar-brand">JobConnect</a>
+        <div class="nav-links">
+            <a th:href="@{/dashboard}" class="btn-logout" style="border-color: var(--primary); color: var(--primary);">Back to Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="auth-container" style="align-items: flex-start; padding-top: 3rem;">
+        <div class="glass-card" style="max-width: 600px;">
+            <h2 class="brand-title" th:text="${isEdit} ? 'Edit Job Posting' : 'Post a New Job'">Post a Job</h2>
+            <p class="brand-subtitle">Fill in the details for your job listing</p>
+
+            <form th:action="${isEdit} ? @{/jobs/edit/{id}(id=${job.id})} : @{/jobs/post}" th:object="${job}" method="post">
+                
+                <div class="form-group">
+                    <label for="title" class="form-label">Job Title</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="title" th:field="*{title}" class="form-input" placeholder="e.g. Senior Software Engineer" required>
+                    </div>
+                    <span class="input-error-msg" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="location" class="form-label">Location</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="location" th:field="*{location}" class="form-input" placeholder="e.g. San Francisco, CA (or Remote)" required>
+                    </div>
+                    <span class="input-error-msg" th:if="${#fields.hasErrors('location')}" th:errors="*{location}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="salary" class="form-label">Salary (Annual, USD)</label>
+                    <div class="input-wrapper">
+                        <input type="number" step="1000" id="salary" th:field="*{salary}" class="form-input" placeholder="e.g. 120000" required>
+                    </div>
+                    <span class="input-error-msg" th:if="${#fields.hasErrors('salary')}" th:errors="*{salary}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="deadline" class="form-label">Application Deadline</label>
+                    <div class="input-wrapper">
+                        <input type="date" id="deadline" th:field="*{deadline}" class="form-input" required>
+                    </div>
+                    <span class="input-error-msg" th:if="${#fields.hasErrors('deadline')}" th:errors="*{deadline}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">Job Description</label>
+                    <div class="input-wrapper">
+                        <textarea id="description" th:field="*{description}" class="form-input" rows="6" placeholder="Provide a detailed description of the role, requirements, and responsibilities..." required style="resize: vertical; font-family: inherit;"></textarea>
+                    </div>
+                    <span class="input-error-msg" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary" th:text="${isEdit} ? 'Update Job Posting' : 'Publish Job Listing'">Publish Job</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

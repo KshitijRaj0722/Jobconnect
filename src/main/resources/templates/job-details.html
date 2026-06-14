@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${job.title} + ' - JobConnect'">Job Details</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .details-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .meta-item {
+            margin-bottom: 1rem;
+        }
+        .meta-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        .meta-val {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a th:href="@{/dashboard}" class="navbar-brand">JobConnect</a>
+        <div class="nav-links">
+            <a th:href="@{/jobs/search}" class="btn-logout" style="border-color: var(--primary); color: var(--primary);">Back to Job Search</a>
+            <a th:href="@{/dashboard}" class="btn-logout">Dashboard</a>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <!-- Error alert if already applied or other issue -->
+        <div th:if="${param.error}" class="alert alert-error" style="margin-bottom: 2rem;">
+            <span th:text="${param.error}">An error occurred</span>
+        </div>
+
+        <div class="details-grid">
+            <!-- Left Panel: Job Details -->
+            <div class="glass-card" style="max-width: 100%;">
+                <h1 style="font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff;" th:text="${job.title}">Job Title</h1>
+                <p style="color: var(--primary); font-size: 1.1rem; font-weight: 500; margin-bottom: 2rem;" th:text="'Posted by ' + ${job.employer.fullName}"></p>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-card); margin-bottom: 2rem;">
+
+                <h3 style="margin-bottom: 1rem; color: #fff;">Job Description</h3>
+                <div style="white-space: pre-wrap; line-height: 1.6; color: var(--text-muted);" th:text="${job.description}">
+                    Description goes here...
+                </div>
+            </div>
+
+            <!-- Right Panel: Metadata & Application Form -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <!-- Job Metadata Card -->
+                <div class="glass-card" style="max-width: 100%; padding: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem; color: #fff;">Job Details</h3>
+                    
+                    <div class="meta-item">
+                        <div class="meta-label">Location</div>
+                        <div class="meta-val" th:text="${job.location}">San Francisco, CA</div>
+                    </div>
+
+                    <div class="meta-item">
+                        <div class="meta-label">Offered Salary</div>
+                        <div class="meta-val" th:text="'$' + ${#numbers.formatDecimal(job.salary, 0, 'COMMAS', 0, 'POINT')} + ' / year'">$120,000</div>
+                    </div>
+
+                    <div class="meta-item">
+                        <div class="meta-label">Application Deadline</div>
+                        <div class="meta-val" th:text="${job.deadline}">2026-06-30</div>
+                    </div>
+                </div>
+
+                <!-- Seeker Apply Form -->
+                <div th:if="${currentUser != null && currentUser.role == T(com.jobconnect.model.Role).ROLE_JOB_SEEKER}" class="glass-card" style="max-width: 100%; padding: 2rem; border-color: rgba(99, 102, 241, 0.2);">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Apply For This Role</h3>
+                    
+                    <form th:action="@{/applications/apply}" method="post">
+                        <input type="hidden" name="jobId" th:value="${job.id}">
+                        
+                        <div class="form-group">
+                            <label for="resumeUrl" class="form-label">Resume Link / Portfolio URL</label>
+                            <input type="url" id="resumeUrl" name="resumeUrl" class="form-input" placeholder="https://drive.google.com/..." required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="coverLetter" class="form-label">Cover Letter</label>
+                            <textarea id="coverLetter" name="coverLetter" class="form-input" rows="5" placeholder="Briefly introduce yourself and explain why you're a fit..." required style="resize: vertical; font-family: inherit;"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Submit Application</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

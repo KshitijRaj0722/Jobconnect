@@ -1,0 +1,9 @@
+target/
+*.class
+*.log
+.vscode/
+*.iml
+.idea/
+app-run.log
+app-err.log
+app.log

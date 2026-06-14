@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Applicants - JobConnect</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .applicant-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .applicant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .candidate-info h3 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+        .candidate-meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .badge-status {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+        }
+        .status-applied { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .status-reviewed { background: rgba(234, 179, 8, 0.15); color: #fef08a; border: 1px solid rgba(234, 179, 8, 0.3); }
+        .status-shortlisted { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-rejected { background: rgba(244, 63, 94, 0.15); color: #fca5a5; border: 1px solid rgba(244, 63, 94, 0.3); }
+        .status-accepted { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+        
+        .update-status-form {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            border-top: 1px solid var(--border-card);
+            padding-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a th:href="@{/dashboard}" class="navbar-brand">JobConnect</a>
+        <div class="nav-links">
+            <a th:href="@{/dashboard}" class="btn-logout" style="border-color: var(--primary); color: var(--primary);">Back to Dashboard</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="dashboard-container">
+        <div style="margin-bottom: 2.5rem;">
+            <h1 style="font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff;">Job Applications</h1>
+            <p style="color: var(--text-muted);">Review candidates and manage application status updates</p>
+        </div>
+
+        <div th:if="${param.statusUpdatedSuccess}" class="alert alert-success" style="margin-bottom: 2rem;">
+            <span>Application status updated successfully.</span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(applications)}" class="glass-card" style="max-width: 100%; text-align: center; padding: 4rem 2rem;">
+            <h3 style="color: var(--text-muted); margin-bottom: 0.5rem;">No Applications Yet</h3>
+            <p style="color: rgba(255,255,255,0.4);">No candidates have applied for this listing so far.</p>
+        </div>
+
+        <!-- Applicant Cards -->
+        <div th:each="app : ${applications}" class="applicant-card">
+            <div class="applicant-header">
+                <div class="candidate-info">
+                    <h3 th:text="${app.seeker.fullName}">Candidate Name</h3>
+                    <div class="candidate-meta">
+                        <span th:text="'Email: ' + ${app.seeker.email}">candidate@example.com</span>
+                        <span th:if="${app.seeker.phoneNumber}" th:text="'Phone: ' + ${app.seeker.phoneNumber}">+123456789</span>
+                        <span th:text="'Applied: ' + ${#temporals.format(app.createdAt, 'yyyy-MM-dd HH:mm')}">2026-06-13</span>
+                    </div>
+                </div>
+                <div>
+                    <!-- Status Badge -->
+                    <span th:class="'badge-status ' + 
+                                   (${app.status == T(com.jobconnect.model.ApplicationStatus).APPLIED} ? 'status-applied' : '') +
+                                   (${app.status == T(com.jobconnect.model.ApplicationStatus).REVIEWED} ? 'status-reviewed' : '') +
+                                   (${app.status == T(com.jobconnect.model.ApplicationStatus).SHORTLISTED} ? 'status-shortlisted' : '') +
+                                   (${app.status == T(com.jobconnect.model.ApplicationStatus).REJECTED} ? 'status-rejected' : '') +
+                                   (${app.status == T(com.jobconnect.model.ApplicationStatus).ACCEPTED} ? 'status-accepted' : '')"
+                          th:text="${app.status}">APPLIED</span>
+                </div>
+            </div>
+
+            <!-- Resume Link -->
+            <div th:if="${app.resumeUrl}" style="margin-top: 0.5rem;">
+                <h5 style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Resume / Portfolio</h5>
+                <a th:href="${app.resumeUrl}" target="_blank" class="auth-link" style="font-weight: 500; font-size: 1.05rem;" th:text="${app.resumeUrl}">https://drive.google.com/...</a>
+            </div>
+
+            <!-- Cover Letter -->
+            <div>
+                <h5 style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Cover Letter</h5>
+                <div style="background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 12px; padding: 1.5rem; white-space: pre-wrap; line-height: 1.6; color: var(--text-main);" th:text="${app.coverLetter}">
+                    Cover letter content...
+                </div>
+            </div>
+
+            <!-- Update Status Form -->
+            <form th:action="@{/applications/{id}/status(id=${app.id})}" method="post" class="update-status-form">
+                <label for="status" class="form-label" style="margin-bottom: 0; font-weight: 600;">Update Status:</label>
+                <div class="input-wrapper" style="width: 200px;">
+                    <select id="status" name="status" class="form-input" required style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                        <option th:each="st : ${T(com.jobconnect.model.ApplicationStatus).values()}" 
+                                th:value="${st}" 
+                                th:text="${st}" 
+                                th:selected="${st == app.status}"></option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: auto; padding: 0.5rem 1.5rem; font-size: 0.9rem;">Submit Change</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

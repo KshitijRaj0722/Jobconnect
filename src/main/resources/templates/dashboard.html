@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - JobConnect</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 0.75rem;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        /* Dashboard Tables */
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .dashboard-table th {
+            padding: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-card);
+        }
+        .dashboard-table td {
+            padding: 1.25rem 1rem;
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--border-card);
+            color: var(--text-main);
+        }
+        .dashboard-table tr:last-child td {
+            border-bottom: none;
+        }
+        /* Status Badges */
+        .badge-status {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        .status-applied { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .status-reviewed { background: rgba(234, 179, 8, 0.15); color: #fef08a; border: 1px solid rgba(234, 179, 8, 0.3); }
+        .status-shortlisted { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-rejected { background: rgba(244, 63, 94, 0.15); color: #fca5a5; border: 1px solid rgba(244, 63, 94, 0.3); }
+        .status-accepted { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+        .btn-sm {
+            padding: 0.45rem 0.85rem;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            width: auto;
+            display: inline-flex;
+        }
+        .action-cell {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a th:href="@{/dashboard}" class="navbar-brand">JobConnect</a>
+        <div class="nav-links">
+            <span class="nav-user" th:text="${currentUser.fullName}">User Name</span>
+            <a th:href="@{/logout}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Container -->
+    <main class="dashboard-container">
+        <!-- Success/Alert Notifications -->
+        <div th:if="${param.jobPostedSuccess}" class="alert alert-success">
+            <span>Job listing published successfully!</span>
+        </div>
+        <div th:if="${param.jobUpdatedSuccess}" class="alert alert-success">
+            <span>Job listing updated successfully!</span>
+        </div>
+        <div th:if="${param.jobDeletedSuccess}" class="alert alert-success">
+            <span>Job listing has been deleted.</span>
+        </div>
+        <div th:if="${param.applySuccess}" class="alert alert-success">
+            <span>Application submitted successfully! Track updates below.</span>
+        </div>
+        <div th:if="${param.error}" class="alert alert-error">
+            <span th:text="${param.error}">An error occurred</span>
+        </div>
+
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+            <div class="welcome-text">
+                <h1 th:text="'Welcome, ' + ${currentUser.fullName}">Welcome, User!</h1>
+                <p>Manage your account, jobs, and applications in one place.</p>
+            </div>
+            <div>
+                <!-- Role Badge -->
+                <span th:if="${currentUser.role == T(com.jobconnect.model.Role).ROLE_JOB_SEEKER}" class="badge badge-seeker">Job Seeker</span>
+                <span th:if="${currentUser.role == T(com.jobconnect.model.Role).ROLE_EMPLOYER}" class="badge badge-employer">Employer</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid Content -->
+        <div class="dashboard-grid">
+            
+            <!-- JOB SEEKER VIEW -->
+            <div th:if="${currentUser.role == T(com.jobconnect.model.Role).ROLE_JOB_SEEKER}" class="glass-card" style="max-width: 100%;">
+                <div class="section-header">
+                    <h2 class="section-title">My Job Applications</h2>
+                    <a th:href="@{/jobs/search}" class="btn btn-primary btn-sm">Search Available Jobs</a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Location</th>
+                                <th>Company</th>
+                                <th>Applied Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(myApplications)}">
+                                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                                    You haven't applied to any jobs yet. Click 'Search Available Jobs' to find opportunities!
+                                </td>
+                            </tr>
+                            <tr th:each="app : ${myApplications}">
+                                <td>
+                                    <a th:href="@{/jobs/{id}(id=${app.job.id})}" th:text="${app.job.title}" class="auth-link" style="font-weight: 500;">Developer</a>
+                                </td>
+                                <td th:text="${app.job.location}">Remote</td>
+                                <td th:text="${app.job.employer.fullName}">Tech Corp</td>
+                                <td th:text="${#temporals.format(app.createdAt, 'yyyy-MM-dd')}">2026-06-13</td>
+                                <td>
+                                    <!-- Status Badge -->
+                                    <span th:class="'badge-status ' + 
+                                                   (${app.status == T(com.jobconnect.model.ApplicationStatus).APPLIED} ? 'status-applied' : '') +
+                                                   (${app.status == T(com.jobconnect.model.ApplicationStatus).REVIEWED} ? 'status-reviewed' : '') +
+                                                   (${app.status == T(com.jobconnect.model.ApplicationStatus).SHORTLISTED} ? 'status-shortlisted' : '') +
+                                                   (${app.status == T(com.jobconnect.model.ApplicationStatus).REJECTED} ? 'status-rejected' : '') +
+                                                   (${app.status == T(com.jobconnect.model.ApplicationStatus).ACCEPTED} ? 'status-accepted' : '')"
+                                          th:text="${app.status}">APPLIED</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- EMPLOYER VIEW -->
+            <div th:if="${currentUser.role == T(com.jobconnect.model.Role).ROLE_EMPLOYER}" class="glass-card" style="max-width: 100%;">
+                <div class="section-header">
+                    <h2 class="section-title">My Posted Jobs</h2>
+                    <a th:href="@{/jobs/post}" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); box-shadow: 0 4px 14px 0 rgba(244, 63, 94, 0.3);">Post a New Job</a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Location</th>
+                                <th>Salary</th>
+                                <th>Deadline</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(myJobs)}">
+                                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                                    You haven't posted any jobs yet. Click 'Post a New Job' to create listings!
+                                </td>
+                            </tr>
+                            <tr th:each="job : ${myJobs}">
+                                <td>
+                                    <a th:href="@{/jobs/{id}(id=${job.id})}" th:text="${job.title}" class="auth-link" style="font-weight: 500;">Developer</a>
+                                </td>
+                                <td th:text="${job.location}">Remote</td>
+                                <td th:text="'$' + ${#numbers.formatDecimal(job.salary, 0, 'COMMAS', 0, 'POINT')}">120000</td>
+                                <td th:text="${job.deadline}">2026-06-30</td>
+                                <td>
+                                    <div class="action-cell" style="justify-content: flex-end;">
+                                        <a th:href="@{/applications/job/{id}(id=${job.id})}" class="btn btn-primary btn-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff;">Applicants</a>
+                                        <a th:href="@{/jobs/edit/{id}(id=${job.id})}" class="btn btn-primary btn-sm" style="background: #1e293b; color: #fff;">Edit</a>
+                                        <form th:action="@{/jobs/delete/{id}(id=${job.id})}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this job listing? This will also delete all applications associated with it.');">
+                                            <button type="submit" class="btn btn-logout btn-sm" style="border: 1px solid var(--accent); color: var(--accent); padding: 0.45rem 0.85rem;">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</body>
+</html>
