@@ -58,8 +58,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of(
-            "https://jobconnect-frontend-psi.vercel.app",
-            "https://jobconnect-api-t4q0.onrender.com",
+            "https://*.vercel.app",
+            "https://*.netlify.app",
+            "https://ecommerce-backend-l0yd.onrender.com",
             "http://localhost:5173",
             "http://localhost:3000"
         ));
